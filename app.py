@@ -9,3 +9,8 @@ st.set_page_config(
 
 st.title("📄 AI Resume Analyzer")
 st.write("Upload your resume and get AI insights.")
+
+uploaded_file = st.file_uploader(
+    "Upload Resume PDF",
+    type="pdf"
+)

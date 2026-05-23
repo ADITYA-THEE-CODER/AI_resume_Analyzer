@@ -25,3 +25,7 @@ if uploaded_file:
         text += page.extract_text()
 
     st.write(text)
+
+client = Groq(
+    api_key=st.secrets["GROQ_API_KEY"]
+)

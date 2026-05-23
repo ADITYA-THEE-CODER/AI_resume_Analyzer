@@ -29,3 +29,4 @@ if uploaded_file:
 client = Groq(
     api_key=st.secrets["GROQ_API_KEY"]
 )
+st.write(text)

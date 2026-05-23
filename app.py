@@ -30,3 +30,26 @@ client = Groq(
     api_key=st.secrets["GROQ_API_KEY"]
 )
 st.write(text)
+
+prompt = f"""
+Summarize this resume professionally.
+
+Resume:
+{text}
+"""
+
+response = client.chat.completions.create(
+    model="llama-3.1-8b-instant",
+    messages=[
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ]
+)
+
+summary = response.choices[0].message.content
+
+st.subheader("Resume Summary")
+
+st.write(summary)

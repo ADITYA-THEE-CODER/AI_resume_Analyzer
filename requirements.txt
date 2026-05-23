@@ -1,1 +1,3 @@
-pip install streamlit pypdf groq
+streamlit
+pypdf
+groq

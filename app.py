@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 from pypdf import PdfReader
 from groq import Groq
 
@@ -42,9 +41,9 @@ if uploaded_file:
     # Read PDF
     reader = PdfReader(uploaded_file)
 
-    # Extract Text
     text = ""
 
+    # Extract Text
     for page in reader.pages:
 
         extracted = page.extract_text()
@@ -53,20 +52,19 @@ if uploaded_file:
             text += extracted
 
     # =========================
-    # AI PROMPT
+    # PROMPT
     # =========================
 
     prompt = f"""
     Analyze this resume professionally.
 
-    Give the response STRICTLY in this format:
-
-    Summary: ...
-    Strengths: ...
-    Weaknesses: ...
-    Suggestions: ...
-    Missing Skills: ...
-    Rating: ...
+    Give:
+    - Professional Summary
+    - Key Strengths
+    - Weaknesses
+    - Suggestions For Improvement
+    - Missing Technical Skills
+    - Overall Resume Rating out of 10
 
     Resume:
     {text}
@@ -91,46 +89,28 @@ if uploaded_file:
     analysis = response.choices[0].message.content
 
     # =========================
-    # PARSE AI RESPONSE
-    # =========================
-
-    sections = {
-        "Summary": "",
-        "Strengths": "",
-        "Weaknesses": "",
-        "Suggestions": "",
-        "Missing Skills": "",
-        "Rating": ""
-    }
-
-    lines = analysis.split("\n")
-
-    for line in lines:
-
-        if ":" in line:
-
-            key, value = line.split(":", 1)
-
-            key = key.strip()
-
-            value = value.strip()
-
-            if key in sections:
-                sections[key] = value
-
-    # =========================
-    # CREATE TABLE
-    # =========================
-
-    df = pd.DataFrame({
-        "Category": sections.keys(),
-        "Analysis": sections.values()
-    })
-
-    # =========================
-    # DISPLAY TABLE
+    # DISPLAY RESULTS
     # =========================
 
     st.subheader("📊 Resume Analysis")
 
-    st.table(df)
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.info("📝 Professional Summary")
+        st.write(analysis)
+
+    with col2:
+
+        st.success("✅ AI Analysis Completed")
+
+        st.metric(
+            label="Resume Status",
+            value="Analyzed"
+        )
+
+        st.metric(
+            label="AI Model",
+            value="Llama 3.1"
+        )

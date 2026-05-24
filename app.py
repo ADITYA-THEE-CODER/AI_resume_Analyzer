@@ -42,10 +42,9 @@ if uploaded_file:
     # Read PDF
     reader = PdfReader(uploaded_file)
 
-    # Store Extracted Text
+    # Extract Text
     text = ""
 
-    # Extract Text From Pages
     for page in reader.pages:
 
         extracted = page.extract_text()
@@ -54,28 +53,27 @@ if uploaded_file:
             text += extracted
 
     # =========================
-    # CREATE PROMPT
+    # AI PROMPT
     # =========================
 
     prompt = f"""
     Analyze this resume professionally.
 
-    Give:
-    1. Short Professional Summary
-    2. Key Strengths
-    3. Weaknesses
-    4. Suggestions For Improvement
-    5. Missing Technical Skills
-    6. Overall Resume Rating out of 10
+    Give the response STRICTLY in this format:
 
-    Keep the response concise and structured.
+    Summary: ...
+    Strengths: ...
+    Weaknesses: ...
+    Suggestions: ...
+    Missing Skills: ...
+    Rating: ...
 
     Resume:
     {text}
     """
 
     # =========================
-    # SEND TO GROQ
+    # AI RESPONSE
     # =========================
 
     with st.spinner("Analyzing Resume..."):
@@ -90,57 +88,49 @@ if uploaded_file:
             ]
         )
 
-    # =========================
-    # EXTRACT RESPONSE
-    # =========================
-
     analysis = response.choices[0].message.content
 
     # =========================
-    # DISPLAY RAW ANALYSIS
+    # PARSE AI RESPONSE
     # =========================
 
-    st.subheader("📌 Resume Analysis")
-
-    st.write(analysis)
-
-    # =========================
-    # CREATE TABLE DATA
-    # =========================
-
-    data = {
-        "Category": [
-            "Professional Summary",
-            "Key Strengths",
-            "Weaknesses",
-            "Suggestions",
-            "Missing Skills",
-            "Resume Rating"
-        ],
-
-        "Status": [
-            "Generated",
-            "Analyzed",
-            "Analyzed",
-            "Generated",
-            "Detected",
-            "Calculated"
-        ]
+    sections = {
+        "Summary": "",
+        "Strengths": "",
+        "Weaknesses": "",
+        "Suggestions": "",
+        "Missing Skills": "",
+        "Rating": ""
     }
 
+    lines = analysis.split("\n")
+
+    for line in lines:
+
+        if ":" in line:
+
+            key, value = line.split(":", 1)
+
+            key = key.strip()
+
+            value = value.strip()
+
+            if key in sections:
+                sections[key] = value
+
     # =========================
-    # CREATE DATAFRAME
+    # CREATE TABLE
     # =========================
 
-    df = pd.DataFrame(data)
+    df = pd.DataFrame({
+        "Category": sections.keys(),
+        "Analysis": sections.values()
+    })
 
     # =========================
     # DISPLAY TABLE
     # =========================
 
-    st.subheader("📊 Analysis Overview")
+    st.subheader("📊 Resume Analysis")
 
-    st.dataframe(
-        df,
-        use_container_width=True
-    )
+    st.table(df)
